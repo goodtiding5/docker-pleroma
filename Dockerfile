@@ -53,13 +53,6 @@ ENV DOMAIN=localhost \
     DB_USER="pleroma" \
     DB_PASS="pleroma"
 
-COPY --from=bootstrap --chown=0:0 /usr/local/bin/gosu /usr/local/bin
-COPY --from=build --chown=pleroma:0 /release ${HOME}
-
-COPY ./config/docker.exs /etc/pleroma/config.exs
-COPY ./bin/* /usr/local/bin
-COPY ./entrypoint.sh /entrypoint.sh
-
 RUN apk add --no-cache \
         tini \
 	curl \
@@ -71,8 +64,14 @@ RUN apk add --no-cache \
 &&  mkdir -p ${DATA}/static \
 &&  chown -R pleroma:pleroma ${DATA} \
 &&  mkdir -p /etc/pleroma \
-&&  chown -R pleroma:root /etc/pleroma \
-&&  ln -s $HOME/bin/pleroma_ctl /usr/local/bin
+&&  chown -R pleroma:root /etc/pleroma
+
+COPY --from=bootstrap --chown=0:0 /usr/local/bin/gosu /usr/local/bin
+COPY --from=build --chown=pleroma:0 /release ${HOME}
+
+COPY ./config/docker.exs /etc/pleroma/config.exs
+COPY ./bin/* /usr/local/bin
+COPY ./entrypoint.sh /entrypoint.sh
 
 VOLUME $DATA
 

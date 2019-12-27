@@ -5,6 +5,8 @@ set -e
 WORKDIR=/opt/pleroma
 DATADIR=/var/lib/pleroma
 
+PATH=$PATH:$WORKDIR/bin; export PATH
+
 [ -d $DATADIR/static ]	|| mkdir -p $DATADIR/static
 [ -d $DATADIR/uploads ]	|| mkdir -p $DATADIR/uploads
 
