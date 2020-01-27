@@ -21,7 +21,7 @@ RUN set -eux; \
 
 FROM elixir:1.9-alpine as build
 
-ARG RELEASE="release/1.1.7"
+ARG RELEASE="release/1.1.8"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
