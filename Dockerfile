@@ -2,7 +2,7 @@ FROM elixir:1.9-alpine as build
 
 # -- Install gosu 1.11
 
-ARG GOSU_VERSION 1.11
+ARG GOSU_VERSION=1.11
 RUN set -eux; \
     apk add --no-cache ca-certificates dpkg gnupg; \
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
