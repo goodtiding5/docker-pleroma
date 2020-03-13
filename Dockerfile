@@ -72,7 +72,7 @@ RUN apk add --no-cache \
 
 COPY --from=build --chown=0:0 /usr/local/bin/gosu /usr/local/bin
 COPY --from=build --chown=pleroma:0 /release ${HOME}
-COPY --from=build --chown=pleroma:0 /pleroma/config/docker.exs /usr/pleroma/config.exs
+COPY --from=build --chown=pleroma:0 /pleroma/config/docker.exs /etc/pleroma/config.exs
 
 COPY ./bin/* /usr/local/bin
 COPY ./entrypoint.sh /entrypoint.sh
