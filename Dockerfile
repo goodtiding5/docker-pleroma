@@ -1,6 +1,8 @@
-FROM alpine:3.10 as bootstrap
+FROM elixir:1.9-alpine as build
 
-ENV GOSU_VERSION 1.11
+# -- Install gosu 1.11
+
+ARG GOSU_VERSION 1.11
 RUN set -eux; \
     apk add --no-cache ca-certificates dpkg gnupg; \
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -19,14 +21,14 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true
 
-FROM elixir:1.9-alpine as build
+# -- Build pleroma release 2.0.0
 
-ARG RELEASE="release/1.1.9"
+ARG RELEASE="release/2.0.0"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
-&&  cd /; git clone -b $RELEASE https://git.pleroma.social/pleroma/pleroma.git \
-&&  cd pleroma \
+&&  git clone -b $RELEASE https://git.pleroma.social/pleroma/pleroma.git /pleroma \
+&&  cd /pleroma \
 &&  sed -i -e '/version: version/s/)//' -e '/version: version/s/version(//' mix.exs \
 &&  echo "import Mix.Config" > config/prod.secret.exs \
 &&  mix local.hex --force \
@@ -34,6 +36,8 @@ RUN apk add git gcc g++ musl-dev make \
 &&  mix deps.get --only prod \
 &&  mkdir -p /release \
 &&  mix release --path /release
+
+# -------------------------------------------------------------------------------------------------------
 
 FROM alpine:3.10
 
@@ -66,10 +70,10 @@ RUN apk add --no-cache \
 &&  mkdir -p /etc/pleroma \
 &&  chown -R pleroma:root /etc/pleroma
 
-COPY --from=bootstrap --chown=0:0 /usr/local/bin/gosu /usr/local/bin
+COPY --from=build --chown=0:0 /usr/local/bin/gosu /usr/local/bin
 COPY --from=build --chown=pleroma:0 /release ${HOME}
+COPY --from=build --chown=pleroma:0 /pleroma/config/docker.exs /usr/pleroma/config.exs
 
-COPY ./config/docker.exs /etc/pleroma/config.exs
 COPY ./bin/* /usr/local/bin
 COPY ./entrypoint.sh /entrypoint.sh
 
