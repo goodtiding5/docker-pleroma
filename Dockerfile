@@ -21,9 +21,9 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true
 
-# -- Build pleroma release 2.0.0
+# -- Build pleroma release 2.0.1
 
-ARG RELEASE="release/2.0.0"
+ARG RELEASE="release/2.0.1"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
