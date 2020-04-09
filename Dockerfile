@@ -1,4 +1,4 @@
-FROM elixir:1.9-alpine as build
+FROM elixir:1.10-alpine as build
 
 # -- Install gosu 1.11
 
@@ -21,9 +21,9 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true
 
-# -- Build pleroma release 2.0.1
+# -- Build pleroma release 2.0.2
 
-ARG RELEASE="release/2.0.1"
+ARG RELEASE="release/2.0.2"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
@@ -39,7 +39,7 @@ RUN apk add git gcc g++ musl-dev make \
 
 # -------------------------------------------------------------------------------------------------------
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 LABEL maintainer="ken@epenguin.com"
 
