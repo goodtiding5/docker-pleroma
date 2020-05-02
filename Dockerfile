@@ -23,11 +23,11 @@ RUN set -eux; \
 
 # -- Build pleroma release 2.0.3
 
-ARG RELEASE="release/2.0.3"
+ARG TAG="v2.0.3"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
-&&  git clone -b $RELEASE https://git.pleroma.social/pleroma/pleroma.git /pleroma \
+&&  git clone -b $TAG --single-branch https://git.pleroma.social/pleroma/pleroma.git /pleroma \
 &&  cd /pleroma \
 &&  sed -i -e '/version: version/s/)//' -e '/version: version/s/version(//' mix.exs \
 &&  echo "import Mix.Config" > config/prod.secret.exs \
