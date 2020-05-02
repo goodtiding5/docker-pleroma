@@ -1,4 +1,4 @@
-FROM elixir:1.11-alpine as build
+FROM elixir:1.10-alpine as build
 
 # -- Install gosu 1.11
 
