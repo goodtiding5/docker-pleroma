@@ -24,7 +24,6 @@ RUN set -eux; \
 # -- Build pleroma release 2.0.5
 
 ARG TAG="v2.0.5"
-=======
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
