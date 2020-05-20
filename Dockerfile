@@ -21,9 +21,9 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true
 
-# -- Build pleroma release 2.0.3
+# -- Build pleroma release 2.0.5
 
-ARG TAG="v2.0.3"
+ARG TAG="v2.0.5"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
@@ -40,7 +40,7 @@ RUN apk add git gcc g++ musl-dev make \
 # -------------------------------------------------------------------------------------------------------
 
 #
-# elixir 1.11-alpine is built on top of alpine:3.11
+# elixir 1.10-alpine is built on top of alpine:3.11
 #
 FROM alpine:3.11
 
