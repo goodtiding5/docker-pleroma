@@ -21,15 +21,14 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true
 
-# -- Build pleroma release 2.0.5
+# -- Build pleroma release 2.0.6
 
-ARG TAG="v2.0.5"
+ARG TAG="v2.0.6"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make \
 &&  git clone -b $TAG --single-branch https://git.pleroma.social/pleroma/pleroma.git /pleroma \
 &&  cd /pleroma \
-&&  sed -i -e '/version: version/s/)//' -e '/version: version/s/version(//' mix.exs \
 &&  echo "import Mix.Config" > config/prod.secret.exs \
 &&  mix local.hex --force \
 &&  mix local.rebar --force \
@@ -67,8 +66,7 @@ RUN apk add --no-cache \
 	postgresql-client \
 &&  addgroup --gid "$GID" pleroma \
 &&  adduser --disabled-password --gecos "Pleroma" --home "$HOME" --ingroup pleroma --uid "$UID" pleroma \
-&&  mkdir -p ${DATA}/uploads \
-&&  mkdir -p ${DATA}/static \
+&&  mkdir -p ${DATA}/uploads ${DATA}/static \
 &&  chown -R pleroma:pleroma ${DATA} \
 &&  mkdir -p /etc/pleroma \
 &&  chown -R pleroma:root /etc/pleroma
