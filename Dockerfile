@@ -21,12 +21,12 @@ RUN set -eux; \
     gosu --version; \
     gosu nobody true
 
-# -- Build pleroma for release 2.0.7
+# -- Build pleroma for release 2.1.0
 
-ARG TAG="v2.0.7"
+ARG TAG="v2.1.0"
 ARG MIX_ENV=prod
 
-RUN apk add git gcc g++ musl-dev make \
+RUN apk add git gcc g++ musl-dev make cmake \
 &&  git clone -b $TAG --single-branch https://git.pleroma.social/pleroma/pleroma.git /pleroma \
 &&  cd /pleroma \
 &&  echo "import Mix.Config" > config/prod.secret.exs \
@@ -64,6 +64,8 @@ RUN apk add --no-cache \
 	curl \
 	ncurses \
 	postgresql-client \
+	exiftool \
+	imagemagick \
 &&  addgroup --gid "$GID" pleroma \
 &&  adduser --disabled-password --gecos "Pleroma" --home "$HOME" --ingroup pleroma --uid "$UID" pleroma \
 &&  mkdir -p ${DATA}/uploads ${DATA}/static \
