@@ -31,9 +31,9 @@ RUN set -eux; \
 	gosu nobody true
 
 
-# -- Build pleroma for release 2.1.1
+# -- Build pleroma for release 2.1.2
 
-ARG TAG="v2.1.1"
+ARG TAG="v2.1.2"
 ARG MIX_ENV=prod
 
 RUN apk add git gcc g++ musl-dev make cmake \
