@@ -31,12 +31,12 @@ RUN set -eux; \
 	gosu nobody true
 
 
-# -- Build pleroma for release 2.1.2
+# -- Build pleroma for release 2.2.0
 
-ARG TAG="v2.1.2"
+ARG TAG="v2.2.0"
 ARG MIX_ENV=prod
 
-RUN apk add git gcc g++ musl-dev make cmake \
+RUN apk add git gcc g++ musl-dev make cmake file-dev \
 &&  git clone -b $TAG --single-branch https://git.pleroma.social/pleroma/pleroma.git /pleroma \
 &&  cd /pleroma \
 &&  echo "import Mix.Config" > config/prod.secret.exs \
@@ -98,7 +98,7 @@ STOPSIGNAL SIGTERM
 
 HEALTHCHECK \
     --start-period=10m \
-    --interval=1m \ 
+    --interval=5m \ 
     CMD curl --fail http://localhost:4000/api/v1/instance || exit 1
 
 ENTRYPOINT ["tini", "--", "/entrypoint.sh"]
