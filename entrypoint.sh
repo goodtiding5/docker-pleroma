@@ -25,7 +25,7 @@ else
     if [[ $@ ]]; then
 	eval "exec $@"
     else
-	exec gosu pleroma /usr/local/bin/start_pleroma.sh
+	exec su-exec pleroma /usr/local/bin/start_pleroma.sh
     fi
 fi
 

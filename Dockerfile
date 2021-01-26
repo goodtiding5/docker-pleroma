@@ -1,57 +1,18 @@
-FROM elixir:1.10-alpine as build
+# Build for 'pleroma'
+#   Fetch OTP instead
 
-# -- Install gosu 1.12
+FROM alpine:3 as build
 
-ENV GOSU_VERSION 1.12
-RUN set -eux; \
-	\
-	apk add --no-cache --virtual .gosu-deps \
-		ca-certificates \
-		dpkg \
-		gnupg \
-	; \
-	\
-	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
-	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
-	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
-	\
-# verify the signature
-	export GNUPGHOME="$(mktemp -d)"; \
-	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
-	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	command -v gpgconf && gpgconf --kill all || :; \
-	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
-	\
-# clean up fetch dependencies
-	apk del --no-network .gosu-deps; \
-	\
-	chmod +x /usr/local/bin/gosu; \
-# verify that the binary works
-	gosu --version; \
-	gosu nobody true
+ARG FLAVOUR=amd64-musl
 
+RUN set -eux \
+&&  apk add --no-cache unzip \
+&&  mkdir -p /build \
+&&  wget -q -O /tmp/pleroma.zip "https://git.pleroma.social/api/v4/projects/2/jobs/artifacts/stable/download?job=$FLAVOUR" \
+&&  unzip -q /tmp/pleroma.zip -d /build/ \
+&&  wget -q -O /build/docker.exs "https://git.pleroma.social/pleroma/pleroma/-/raw/stable/config/docker.exs"
 
-# -- Build pleroma for release 2.2.0
-
-ARG TAG="v2.2.0"
-ARG MIX_ENV=prod
-
-RUN apk add git gcc g++ musl-dev make cmake file-dev \
-&&  git clone -b $TAG --single-branch https://git.pleroma.social/pleroma/pleroma.git /pleroma \
-&&  cd /pleroma \
-&&  echo "import Mix.Config" > config/prod.secret.exs \
-&&  mix local.hex --force \
-&&  mix local.rebar --force \
-&&  mix deps.get --only prod \
-&&  mkdir -p /release \
-&&  mix release --path /release
-
-# -------------------------------------------------------------------------------------------------------
-
-#
-# elixir 1.10-alpine is built on top of alpine:3.11
-#
-FROM alpine:3.11
+FROM alpine:3
 
 LABEL maintainer="ken@epenguin.com"
 
@@ -69,25 +30,17 @@ ENV DOMAIN=localhost \
     DB_USER="pleroma" \
     DB_PASS="pleroma"
 
-RUN apk add --no-cache \
-        tini \
-	curl \
-	ncurses \
-	postgresql-client \
-	exiftool \
-	imagemagick \
+RUN set -eux \
+&&  echo "http://nl.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories \
+&&  apk --update add --no-cache tini su-exec ncurses postgresql-client imagemagick ffmpeg exiftool libmagic \
 &&  addgroup --gid "$GID" pleroma \
 &&  adduser --disabled-password --gecos "Pleroma" --home "$HOME" --ingroup pleroma --uid "$UID" pleroma \
 &&  mkdir -p ${DATA}/uploads ${DATA}/static \
-&&  chown -R pleroma:pleroma ${DATA} \
-&&  mkdir -p /etc/pleroma \
-&&  chown -R pleroma:root /etc/pleroma
+&&  chown -R pleroma:pleroma ${DATA}
 
-COPY --from=build --chown=0:0 /usr/local/bin/gosu /usr/local/bin
-COPY --from=build --chown=pleroma:0 /release ${HOME}
-COPY --from=build --chown=pleroma:0 /pleroma/config/docker.exs /etc/pleroma/config.exs
-
-COPY ./bin/* /usr/local/bin
+COPY --from=build --chown=pleroma:pleroma /build/release $HOME
+COPY --from=build --chown=pleroma:0 /build/docker.exs /etc/pleroma/config.exs
+COPY ./bin /usr/local/bin
 COPY ./entrypoint.sh /entrypoint.sh
 
 VOLUME $DATA
