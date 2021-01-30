@@ -10,7 +10,6 @@ PATH=$PATH:$WORKDIR/bin; export PATH
 [ -d $DATADIR/static ]	|| mkdir -p $DATADIR/static
 [ -d $DATADIR/uploads ]	|| mkdir -p $DATADIR/uploads
 
-chown -R pleroma:pleroma $WORKDIR
 chown -R pleroma:pleroma $DATADIR
 
 if [[ -t 0 || -p /dev/stdin ]]; then
