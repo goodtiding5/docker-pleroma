@@ -34,5 +34,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: epenguincom/pleroma:latest,epenguincom/pleroma:build-$(date +%s)
+          tags:
+            - epenguincom/pleroma:latest
+	    - epenguincom/pleroma:build-$(date +%s)
     
