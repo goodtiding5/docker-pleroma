@@ -27,6 +27,7 @@ RUN set -eux \
 &&  wget -q -O /tmp/pleroma.zip "https://git.pleroma.social/api/v4/projects/2/jobs/artifacts/stable/download?job=$FLAVOUR" \
 &&  unzip -q /tmp/pleroma.zip -d /tmp/ \
 &&  (cd /tmp/release; mv * ${HOME}) \
+&&  rm -rf /tmp/release /tmp/pleroma.zip \
 &&  wget -q -O /etc/pleroma/config.exs "https://git.pleroma.social/pleroma/pleroma/-/raw/stable/config/docker.exs" \
 &&  chown -R pleroma:pleroma ${HOME} \
 &&  chown -R pleroma:0 /etc/pleroma \
