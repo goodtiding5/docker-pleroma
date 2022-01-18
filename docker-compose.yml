@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres:12-alpine
+    container_name: postgres
+    restart: always
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  app:
+    build:
+      context: .
+      args:
+        UID: 1000
+        GID: 1000
+    image: examplecom/pleroma:latest
+    container_name: pleroma
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - ./pleroma:/var/lib/pleroma
+    environment:
+      DOMAIN: social.example.com
+      INSTANCE_NAME: Penguin
+      ADMIN_EMAIL: admin@example.com
+      NOTIFY_EMAIL: admin@example.com
+      DB_HOST: db
+      DB_NAME: prod
+      DB_USER: postgres
+      DB_PASS: postgres
