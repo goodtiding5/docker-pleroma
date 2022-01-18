@@ -1,4 +1,24 @@
-FROM alpine:3
+FROM elixir:1.13-alpine as build
+
+# -- Build pleroma release
+
+ARG TAG="v2.4.2"
+ARG MIX_ENV=prod
+
+RUN apk add git gcc g++ musl-dev make cmake file-dev \
+&&  git clone -b $TAG --single-branch https://git.pleroma.social/pleroma/pleroma.git /pleroma \
+&&  cd /pleroma \
+&&  sed -i -e '/version: version/s/)//' -e '/version: version/s/version(//' mix.exs \
+&&  echo "import Mix.Config" > config/prod.secret.exs \
+&&  mix local.hex --force \
+&&  mix local.rebar --force \
+&&  mix deps.get --only prod \
+&&  mkdir -p /release \
+&&  mix release --path /release
+
+# -------------------------------------------------------------------------------------------------------
+
+FROM alpine:3.14
 
 LABEL maintainer="ken@epenguin.com"
 
@@ -6,8 +26,6 @@ ARG UID=1000
 ARG GID=1000
 ARG HOME=/opt/pleroma
 ARG DATA=/var/lib/pleroma
-
-ARG FLAVOUR=amd64-musl
 
 ENV DOMAIN=localhost \
     INSTANCE_NAME="Pleroma" \
@@ -24,16 +42,13 @@ RUN set -eux \
 &&  addgroup --gid "$GID" pleroma \
 &&  adduser --disabled-password --gecos "Pleroma" --home "$HOME" --ingroup pleroma --uid "$UID" pleroma \
 &&  mkdir -p ${HOME} ${DATA}/uploads ${DATA}/static /etc/pleroma \
-&&  wget -q -O /tmp/pleroma.zip "https://git.pleroma.social/api/v4/projects/2/jobs/artifacts/stable/download?job=$FLAVOUR" \
-&&  unzip -q /tmp/pleroma.zip -d /tmp/ \
-&&  (cd /tmp/release; mv * ${HOME}) \
-&&  rm -rf /tmp/release /tmp/pleroma.zip \
-&&  wget -q -O /etc/pleroma/config.exs "https://git.pleroma.social/pleroma/pleroma/-/raw/stable/config/docker.exs" \
-&&  chown -R pleroma:pleroma ${HOME} \
-&&  chown -R pleroma:0 /etc/pleroma \
-&&  chown -R pleroma:pleroma ${DATA}
+&&  chown -R pleroma:pleroma ${HOME} ${DATA} \
+&&  chown -R pleroma:0 /etc/pleroma
 
-COPY ./bin /usr/local/bin
+COPY --from=build --chown=pleroma:0 /release ${HOME}
+COPY --from=build --chown=pleroma:0 /pleroma/config/docker.exs /etc/pleroma/config.exs
+
+COPY ./bin/* /usr/local/bin
 COPY ./entrypoint.sh /entrypoint.sh
 
 VOLUME $DATA
@@ -44,7 +59,7 @@ STOPSIGNAL SIGTERM
 
 HEALTHCHECK \
     --start-period=10m \
-    --interval=5m \ 
+    --interval=1m \ 
     CMD curl --fail http://localhost:4000/api/v1/instance || exit 1
 
 ENTRYPOINT ["tini", "--", "/entrypoint.sh"]
