@@ -38,7 +38,7 @@ ENV DOMAIN=localhost \
 
 RUN set -eux \
 &&  echo "http://nl.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories \
-&&  apk --update add --no-cache tini su-exec ncurses postgresql-client imagemagick ffmpeg exiftool libmagic \
+&&  apk --update add --no-cache tini su-exec ncurses postgresql-client imagemagick ffmpeg exiftool libmagic curl \
 &&  addgroup --gid "$GID" pleroma \
 &&  adduser --disabled-password --gecos "Pleroma" --home "$HOME" --ingroup pleroma --uid "$UID" pleroma \
 &&  mkdir -p ${HOME} ${DATA}/uploads ${DATA}/static /etc/pleroma \
